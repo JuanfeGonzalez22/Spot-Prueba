@@ -18,7 +18,7 @@ public class Spot {
    private Long id;
 
    @Column(nullable = false)
-   private String name;
+   private String ubicacion;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
