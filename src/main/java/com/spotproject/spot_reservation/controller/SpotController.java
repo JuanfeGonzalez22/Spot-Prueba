@@ -40,17 +40,13 @@ public class SpotController {
             @RequestParam String horaInicio,
             @RequestParam String horaFin) {
 
-        try {
-            Reserva reserva = spotService.reservarSpot(
-                    spotId,
-                    usuarioId,
-                    LocalDateTime.parse(horaInicio),
-                    LocalDateTime.parse(horaFin)
-            );
-            return ResponseEntity.ok(reserva);
-        }catch (RuntimeException e){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
+       Reserva reserva = spotService.reservarSpot(
+               spotId,
+               usuarioId,
+               LocalDateTime.parse(horaInicio),
+               LocalDateTime.parse(horaFin)
+       );
+       return ResponseEntity.ok(reserva);
     }
 
 
