@@ -34,6 +34,10 @@ public class SpotService {
         Spot spot = spotRepository.findByIdWithLock(spotId)
                 .orElseThrow(() -> new RecursosNoEncontradosException("Spot not found"));
 
+        if(!horaFin.isAfter(horaInicio)) {
+            throw new SpotNoDisponibleException("horaFin debe ser posterior a horaInicio");
+        }
+
         if (spot.getEstado() != Spot.EstadoSpot.DISPONIBLE) {
             throw new SpotNoDisponibleException("Spot no disponible");
         }

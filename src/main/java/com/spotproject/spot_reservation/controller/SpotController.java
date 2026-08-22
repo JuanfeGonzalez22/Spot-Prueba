@@ -1,9 +1,13 @@
 package com.spotproject.spot_reservation.controller;
 
+import com.spotproject.spot_reservation.dto.ReservasRequestDTO;
+import com.spotproject.spot_reservation.dto.SpotRequestDTO;
+import com.spotproject.spot_reservation.dto.SpotResponseDTO;
 import com.spotproject.spot_reservation.model.Reserva;
 import com.spotproject.spot_reservation.model.Spot;
 import com.spotproject.spot_reservation.repository.SpotRepository;
 import com.spotproject.spot_reservation.service.SpotService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/spots")
@@ -23,28 +28,32 @@ public class SpotController {
     private SpotService spotService;
 
     @GetMapping
-    public List<Spot> listarSpots(){
-        return spotRepository.findAll();
+    public List<SpotResponseDTO> listarSpots(){
+        return spotRepository.findAll().stream()
+                .map(SpotResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @PostMapping
-    public Spot crearSpot(@RequestBody Spot spot){
-        spot.setEstado(Spot.EstadoSpot.DISPONIBLE);
-        return spotRepository.save(spot);
+    public SpotResponseDTO crearSpot(@Valid @RequestBody SpotRequestDTO request) {
+        Spot spot = Spot.builder()
+                .ubicacion(request.getUbicacion())
+                .estado(Spot.EstadoSpot.DISPONIBLE)
+                .build();
+        Spot guardado = spotRepository.save(spot);
+        return SpotResponseDTO.fromEntity(guardado);
     }
 
     @PostMapping("/{spotId}/reservar")
     public ResponseEntity<?> reservarSpot(
             @PathVariable Long spotId,
-            @RequestParam Long usuarioId,
-            @RequestParam String horaInicio,
-            @RequestParam String horaFin) {
+            @Valid @RequestBody ReservasRequestDTO request) {
 
        Reserva reserva = spotService.reservarSpot(
                spotId,
-               usuarioId,
-               LocalDateTime.parse(horaInicio),
-               LocalDateTime.parse(horaFin)
+               request.getUsuarioId(),
+               request.getHoraInicio(),
+               request.getHoraFin()
        );
        return ResponseEntity.ok(reserva);
     }
